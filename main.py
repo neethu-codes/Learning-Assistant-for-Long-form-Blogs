@@ -6,13 +6,14 @@ st.title("Personal Learning Assistant Tool")
 url1 = st.sidebar.text_input("URL 1")
 url2 = st.sidebar.text_input("URL 2")
 url3 = st.sidebar.text_input("URL 3")
+url4 = st.sidebar.text_input("URL 4")
 
 placeholder = st.empty()
 
 process_url_button = st.sidebar.button("Process URLs")
 
 if process_url_button:
-    urls = [url for url in (url1, url2, url3) if url!='']
+    urls = [url for url in (url1, url2, url3, url4) if url!='']
     if len(urls) == 0:
         placeholder.text("You must provide at least one valid url")
     else:

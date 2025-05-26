@@ -14,7 +14,7 @@ from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
 load_dotenv()
 
-CHUNK_SIZE = 1000
+CHUNK_SIZE = 1500
 llm = None
 vector_store = None
 
@@ -58,6 +58,7 @@ def process_urls(urls):
     yield "Splitting text into chunks.."
     text_splitter = RecursiveCharacterTextSplitter(
         separators=["\n\n","\n","."," "],
+        chunk_overlap=200,
         chunk_size=CHUNK_SIZE
     )
     docs = text_splitter.split_documents(data)
@@ -72,9 +73,11 @@ def generate_answer(query):
     if not vector_store:
         raise RuntimeError("Vector DB is not initialised")
     
+    retriever = vector_store.as_retriever(
+    search_type="mmr", search_kwargs={"k": 4, "fetch_k": 20}
+    )
+    chain = RetrievalQAWithSourcesChain.from_llm(llm=llm,retriever=retriever)
     
-    chain = RetrievalQAWithSourcesChain.from_llm(llm=llm,retriever=vector_store.as_retriever())
-
     
     result = chain.invoke({"question":query}, return_only_outputs=True)
     sources = result.get("sources","")
