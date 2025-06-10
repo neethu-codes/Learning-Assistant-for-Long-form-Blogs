@@ -1,55 +1,69 @@
-import streamlit as st
-import os
 import sys
+import os
+import streamlit as st 
 
-# --- Conditional Check for Streamlit Cloud ---
+
+# 1. Determine if running on Streamlit Cloud
 IS_STREAMLIT_CLOUD = os.environ.get("STREAMLIT_SERVER_PORT") is not None
-
-# # --- SQLite3 Fix (ONLY on Streamlit Cloud) ---
-# if IS_STREAMLIT_CLOUD:
-#     try:
-#         __import__('pysqlite3')
-#         sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-#         print("Running on Streamlit Cloud: Applied pysqlite3 fix.")
-#     except ImportError:
-#         st.error("Error: pysqlite3-binary not found on Streamlit Cloud. Please ensure it's in your requirements.txt.")
-#         st.stop() 
-# else:
-#     print("Running locally: pysqlite3 fix skipped.")
-
-# --- API Key Loading ---
-# 1. On Streamlit Cloud: Load from st.secrets
 if IS_STREAMLIT_CLOUD:
+    print("Detected running on Streamlit Cloud.")
+else:
+    print("Detected running locally.")
+
+# 2. SQLite3 Fix (Conditional for Streamlit Cloud)
+if IS_STREAMLIT_CLOUD:
+    try:
+        __import__('pysqlite3')
+        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+        print("Streamlit Cloud: Successfully patched sqlite3 to use pysqlite3-binary.")
+    except ImportError:
+        st.error("FATAL ERROR: 'pysqlite3-binary' not found. "
+                 "Please ensure 'pysqlite3-binary' is in your requirements.txt. "
+                 "Check your Streamlit Cloud logs for installation errors.")
+        st.stop()
+    except Exception as e:
+        st.error(f"FATAL ERROR during sqlite3 patch: {e}. Please report this.")
+        st.stop()
+else:
+    print("Local run: Skipping sqlite3 patch.")
+
+# 3. API Key Loading (Conditional for Local vs. Cloud)
+# This ensures your GROQ_API_KEY is available in os.environ for your app.
+if IS_STREAMLIT_CLOUD:
+    # On Streamlit Cloud, load from st.secrets
     if "GROQ_API_KEY" in st.secrets:
         os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
-        print("Running on Streamlit Cloud: Groq API key loaded from st.secrets.")
+        print("Streamlit Cloud: Groq API key loaded from st.secrets.")
     else:
-        st.error("Groq API key not found in Streamlit secrets. Please add 'GROQ_API_KEY' to your app's secrets in the Cloud dashboard.")
+        st.error("Groq API key not found in Streamlit secrets. "
+                 "Please add 'GROQ_API_KEY' to your app's secrets in the Streamlit Cloud dashboard.")
         st.stop()
-# 2. Locally: Load from .env file (if it exists)
 else:
+    # Locally, attempt to load from .env file using python-dotenv
     try:
         from dotenv import load_dotenv
         load_dotenv()
-        print("Running locally: .env file attempted to load.")
+        print("Local run: Attempted to load .env file.")
     except ImportError:
-        print("Running locally: 'python-dotenv' not found. Ensure API keys are set in your environment manually.")
+        print("Local run: 'python-dotenv' not found. Ensure API keys are set in your environment manually.")
     except Exception as e:
-        print(f"Running locally: Error loading .env file: {e}")
+        print(f"Local run: Error loading .env file: {e}")
 
-    # After attempting to load from .env (or if not using .env), check if key is now in os.environ
+    # After attempting to load, verify the key is in os.environ
     if "GROQ_API_KEY" not in os.environ:
         st.error("Groq API key not found in your local environment. "
-                   "Please set the GROQ_API_KEY environment variable (e.g., in your .env file or terminal).")
+                   "Please set the GROQ_API_KEY environment variable (e.g., in your .env file or terminal) "
+                   "before running your app locally.")
         st.stop()
     else:
-        print("Running locally: Groq API key found in OS environment.")
+        print("Local run: Groq API key found in OS environment.")
 
 
-from rag import process_urls, generate_answer
+from rag import process_urls, generate_answer, initialize_components
 
+initialize_components()
 
-
+st.set_page_config(layout="wide")
 st.title("Personal Learning Assistant Tool")
 
 url1 = st.sidebar.text_input("URL 1")
@@ -81,4 +95,4 @@ if query:
             for source in sources.split("\n"):
                 st.write(source)
     except RuntimeError as e:
-        placeholder.text("You must process urls first")
+        placeholder.text(f"Error: {e}. You must process URLs first.")
