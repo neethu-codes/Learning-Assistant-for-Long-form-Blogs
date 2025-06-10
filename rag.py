@@ -81,6 +81,8 @@ def generate_answer(query):
     
     result = chain.invoke({"question":query}, return_only_outputs=True)
     sources = result.get("sources","")
+    print("---------------")
+    print(result)
     return result['answer'], sources
 
 
