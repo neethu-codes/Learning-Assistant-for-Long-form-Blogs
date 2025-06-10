@@ -1,12 +1,18 @@
 import sys
 import os
 import streamlit as st 
+import platform
 
+IS_STREAMLIT_CLOUD = None
+if platform.processor():
+    # Running locally (platform.processor() returns something)
+    IS_STREAMLIT_CLOUD = False
+else:
+    # Running on Streamlit Cloud (platform.processor() returns empty)
+    IS_STREAMLIT_CLOUD = True
 
 # 1. Determine if running on Streamlit Cloud
-IS_STREAMLIT_CLOUD = "STREAMLIT_SERVER_PORT" in os.environ or \
-                     "STREAMLIT_CLOUD_APP" in os.environ or \
-                     "GAIA_STREAMLIT_APP_ID" in os.environ
+
 if IS_STREAMLIT_CLOUD:
     print("Detected running on Streamlit Cloud.")
 else:
