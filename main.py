@@ -5,17 +5,17 @@ import sys
 # --- Conditional Check for Streamlit Cloud ---
 IS_STREAMLIT_CLOUD = os.environ.get("STREAMLIT_SERVER_PORT") is not None
 
-# --- SQLite3 Fix (ONLY on Streamlit Cloud) ---
-if IS_STREAMLIT_CLOUD:
-    try:
-        __import__('pysqlite3')
-        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-        print("Running on Streamlit Cloud: Applied pysqlite3 fix.")
-    except ImportError:
-        st.error("Error: pysqlite3-binary not found on Streamlit Cloud. Please ensure it's in your requirements.txt.")
-        st.stop() 
-else:
-    print("Running locally: pysqlite3 fix skipped.")
+# # --- SQLite3 Fix (ONLY on Streamlit Cloud) ---
+# if IS_STREAMLIT_CLOUD:
+#     try:
+#         __import__('pysqlite3')
+#         sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+#         print("Running on Streamlit Cloud: Applied pysqlite3 fix.")
+#     except ImportError:
+#         st.error("Error: pysqlite3-binary not found on Streamlit Cloud. Please ensure it's in your requirements.txt.")
+#         st.stop() 
+# else:
+#     print("Running locally: pysqlite3 fix skipped.")
 
 # --- API Key Loading ---
 # 1. On Streamlit Cloud: Load from st.secrets
