@@ -5,3 +5,4 @@ langchain_groq==0.3.2
 langchain_huggingface==0.1.2
 python-dotenv==1.1.0
 streamlit==1.42.0
+pysqlite3-binary
