@@ -22,7 +22,7 @@ def initialize_components():
     if vector_store is None:
         ef = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2", 
-            model_kwargs={"trust_remote_code":True}
+            model_kwargs={"trust_remote_code":True,'device': 'cpu'}
         )
         
         # Determine persist_directory based on environment
