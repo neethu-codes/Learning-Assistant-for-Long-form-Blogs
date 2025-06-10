@@ -1,8 +1,5 @@
 from uuid import uuid4
-from dotenv import load_dotenv
-import os
 from pathlib import Path
-# from prompt import PROMPT, EXAMPLE_PROMPT
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains.qa_with_sources.loading import load_qa_with_sources_chain
 from langchain_community.document_loaders import UnstructuredURLLoader
@@ -11,18 +8,9 @@ from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
-
-load_dotenv()
-
 CHUNK_SIZE = 1500
 llm = None
 vector_store = None
-
-api_key = os.getenv('GROQ_API_KEY')
-if api_key is None:
-    print("API Key not found. Please check the .env file.")
-else:
-    print("API Key loaded successfully.")
 
 def initialize_components():
     global llm, vector_store
@@ -78,11 +66,8 @@ def generate_answer(query):
     )
     chain = RetrievalQAWithSourcesChain.from_llm(llm=llm,retriever=retriever)
     
-    
     result = chain.invoke({"question":query}, return_only_outputs=True)
     sources = result.get("sources","")
-    print("---------------")
-    print(result)
     return result['answer'], sources
 
 
