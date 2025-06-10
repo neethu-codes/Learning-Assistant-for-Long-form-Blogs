@@ -4,7 +4,7 @@ import streamlit as st
 
 
 # 1. Determine if running on Streamlit Cloud
-IS_STREAMLIT_CLOUD = os.environ.get("STREAMLIT_SERVER_PORT") is not None
+IS_STREAMLIT_CLOUD = os.environ.get("STREAMLIT_SERVER_ADDRESS") is not None
 if IS_STREAMLIT_CLOUD:
     print("Detected running on Streamlit Cloud.")
 else:
